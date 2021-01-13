@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c9bf0c4e-ceba-4d71-980e-0ec5feca18f2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="b5458ca1-679a-4075-8cb6-b6f571974a06" maxEntries="500" entryTtl="1800"/>
+	<flow name="objectstore-deletion-timeoutFlow" doc:id="de345aaa-1c55-4ae2-b7f2-bc6dbc653796" >
+		<http:listener doc:name="Listener" doc:id="39596373-6d7e-4923-9e40-c765c62001a0" config-ref="HTTP_Listener_config" path="/store"/>
+		<set-variable value="#[payload.empid]" doc:name="Set Variable" doc:id="739ba72b-6ec2-41ae-b3d9-2dc7da1bfbc7" variableName="empid"/>
+		<os:store doc:id="edaf36ad-855d-4813-aeb3-8428622a5f1e" key="#[vars.empid]" objectStore="Object_store"/>
+		<logger level="INFO" doc:name="Logger" doc:id="8a7a594d-5ccb-448e-b125-4a6523442141" message="#[output application/json --- 
+{
+	attributes: attributes,
+	payload : payload
+}]"/>
+		<ee:transform doc:name="Transform Message" doc:id="a9388b1e-40d2-4f08-bac3-d0be3256c971" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"Data stored in object store"]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="objectstore-deletion-timeoutFlow1" doc:id="007d7ede-7527-4227-b342-60d0ee689a94" >
+		<http:listener doc:name="Listener" doc:id="4e45faba-763a-4198-b499-200a61749275" config-ref="HTTP_Listener_config" path="/retrieve"/>
+		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="44965dd1-a859-4c54-b357-a1f372b7eb3f" variableName="empid"/>
+		<os:retrieve doc:name="Retrieve" doc:id="e0acfa6d-fdd2-489e-8589-c79045fb76ea" key="#[vars.empid]" objectStore="Object_store">
+			<os:default-value ><![CDATA[nodata]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="4af5be81-45b8-4322-b27b-425af28146f2" message="#[output application/json --- 
+{
+	attributes: attributes,
+	payload : payload
+}]"/>
+		<ee:transform doc:name="Transform Message" doc:id="601319ff-d8ef-43f8-a98f-dd3d5e2ea8cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
