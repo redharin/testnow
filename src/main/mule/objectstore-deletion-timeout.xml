@@ -11,7 +11,6 @@ http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/m
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<os:object-store name="Object_store" doc:name="Object store" doc:id="b5458ca1-679a-4075-8cb6-b6f571974a06" maxEntries="500" entryTtl="1800"/>
-	<api-gateway:autodiscovery apiId="${autodiscovery.id}" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="038ad0e4-a350-4038-b2ab-87449b0bf0c6" flowRef="${autodiscovery.flowname}" />
 	<flow name="objectstore-deletion-timeoutFlow" doc:id="de345aaa-1c55-4ae2-b7f2-bc6dbc653796" >
 		<http:listener doc:name="Listener" doc:id="39596373-6d7e-4923-9e40-c765c62001a0" config-ref="HTTP_Listener_config" path="/store"/>
 		<set-variable value="#[payload.empid]" doc:name="Set Variable" doc:id="739ba72b-6ec2-41ae-b3d9-2dc7da1bfbc7" variableName="empid"/>
